@@ -194,11 +194,249 @@ export type Database = {
                     },
                 ]
             }
+            users: {
+                Row: {
+                    id: string
+                    nama: string
+                    role: string
+                    email: string
+                    wa: string | null
+                    telegram: string | null
+                    banned: boolean
+                    verified: boolean
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    nama: string
+                    role?: string
+                    email: string
+                    wa?: string | null
+                    telegram?: string | null
+                    banned?: boolean
+                    verified?: boolean
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    nama?: string
+                    role?: string
+                    email?: string
+                    wa?: string | null
+                    telegram?: string | null
+                    banned?: boolean
+                    verified?: boolean
+                    created_at?: string
+                    updated_at?: string
+                }
+                Relationships: []
+            }
+            api_keys: {
+                Row: {
+                    key: string
+                    user_id: string
+                    created_at: string
+                    last_used_at: string | null
+                    is_active: boolean
+                }
+                Insert: {
+                    key: string
+                    user_id: string
+                    created_at?: string
+                    last_used_at?: string | null
+                    is_active?: boolean
+                }
+                Update: {
+                    key?: string
+                    user_id?: string
+                    created_at?: string
+                    last_used_at?: string | null
+                    is_active?: boolean
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "api_keys_user_id_fkey"
+                        columns: ["user_id"]
+                        isOneToOne: false
+                        referencedRelation: "users"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
+            balances: {
+                Row: {
+                    user_id: string
+                    amount: number
+                    updated_at: string
+                }
+                Insert: {
+                    user_id: string
+                    amount?: number
+                    updated_at?: string
+                }
+                Update: {
+                    user_id?: string
+                    amount?: number
+                    updated_at?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "balances_user_id_fkey"
+                        columns: ["user_id"]
+                        isOneToOne: true
+                        referencedRelation: "users"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
+            transactions: {
+                Row: {
+                    id: string
+                    sender_id: string
+                    receiver_id: string
+                    amount: number
+                    paid: boolean
+                    items: number | null
+                    orderid: string
+                    bayarvia: string
+                    unikcode: number | null
+                    grandtotal: number
+                    namaproduk: string | null
+                    catatan: string | null
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    sender_id: string
+                    receiver_id: string
+                    amount: number
+                    paid?: boolean
+                    items?: number | null
+                    orderid: string
+                    bayarvia?: string
+                    unikcode?: number | null
+                    grandtotal: number
+                    namaproduk?: string | null
+                    catatan?: string | null
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    sender_id?: string
+                    receiver_id?: string
+                    amount?: number
+                    paid?: boolean
+                    items?: number | null
+                    orderid?: string
+                    bayarvia?: string
+                    unikcode?: number | null
+                    grandtotal?: number
+                    namaproduk?: string | null
+                    catatan?: string | null
+                    created_at?: string
+                    updated_at?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "transactions_sender_id_fkey"
+                        columns: ["sender_id"]
+                        isOneToOne: false
+                        referencedRelation: "users"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "transactions_receiver_id_fkey"
+                        columns: ["receiver_id"]
+                        isOneToOne: false
+                        referencedRelation: "users"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
+            mutations: {
+                Row: {
+                    id: string
+                    user_id: string
+                    balance: number
+                    prev_balance: number
+                    type: "debit" | "credit"
+                    catatan: string | null
+                    transaction_id: string | null
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    user_id: string
+                    balance: number
+                    prev_balance: number
+                    type: "debit" | "credit"
+                    catatan?: string | null
+                    transaction_id?: string | null
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    user_id?: string
+                    balance?: number
+                    prev_balance?: number
+                    type?: "debit" | "credit"
+                    catatan?: string | null
+                    transaction_id?: string | null
+                    created_at?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "mutations_user_id_fkey"
+                        columns: ["user_id"]
+                        isOneToOne: false
+                        referencedRelation: "users"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "mutations_transaction_id_fkey"
+                        columns: ["transaction_id"]
+                        isOneToOne: false
+                        referencedRelation: "transactions"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
         }
         Views: {
             [_ in never]: never
         }
         Functions: {
+            handle_payment: {
+                Args: {
+                    p_sender_id: string
+                    p_receiver_id: string
+                    p_amount: number
+                    p_orderid?: string
+                    p_bayarvia?: string
+                    p_namaproduk?: string
+                    p_catatan?: string
+                }
+                Returns: Json
+            }
+            validate_api_key: {
+                Args: {
+                    api_key_param: string
+                }
+                Returns: {
+                    user_id: string
+                    is_valid: boolean
+                }
+            }
+            get_user_balance: {
+                Args: {
+                    user_id_param: string
+                }
+                Returns: number
+            }
             requesting_user_id: {
                 Args: Record<PropertyKey, never>
                 Returns: string
