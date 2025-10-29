@@ -1,8 +1,28 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 import { NextRequest, NextResponse } from "next/server"
+import { apiKeyMiddleware } from "@/lib/api-auth-middleware"
 
-// Default Next.js middleware to allow all requests
-export function middleware(request: NextRequest) {
+/**
+ * API key authentication middleware for transaction system
+ * This handles authentication for /api routes using x-api-key header
+ */
+async function apiAuthMiddleware(request: NextRequest): Promise<NextResponse | null> {
+  return await apiKeyMiddleware(request)
+}
+
+/**
+ * Main middleware function
+ * Combines API key authentication for transaction endpoints
+ */
+export default async function middleware(request: NextRequest) {
+  // First, check if this is an API route that needs API key authentication
+  const apiAuthResult = await apiAuthMiddleware(request)
+  if (apiAuthResult) {
+    return apiAuthResult
+  }
+
+  // For other routes, you can add Clerk authentication here if needed
+  // For now, allow all other requests to proceed
   return NextResponse.next()
 }
 
